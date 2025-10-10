@@ -25,12 +25,11 @@ LeLamp is an expressive robot lamp featuring:
 ### Complete Build Process
 
 1. [📋 Prerequisites & Planning](./docs/0.%20Prerequisites.md) - Skills, tools, and BOM
-2. [🔧 Components & 3D Parts](./docs/1.%20Schematics.md) - Technical specs and electrical layout
-3. [⚙️ Servo Setup](./docs/2.%20Servos.md) - Configure servo motors
-4. [🎯 Lamp Head Assembly](./docs/3.%20Lamp%20Head.md) - Pi, camera, audio, LEDs
-5. [🏗️ Lamp Body Assembly](./docs/4.%20Lamp%20Body.md) - Mechanical assembly
-6. [🎮 Lamp Control](./docs/5.%20Lamp%20Control.md) - Recording and playback
-7. [🔍 Troubleshooting](./docs/6.%20Troubleshooting.md) - Common issues and solutions
+2. [🔧 Components & 3D Parts](./docs/1.%203D%20Print.md) - Components and 3D Printed Models
+3. [🎯 Lamp Assembly](./docs/3.%20LeLamp%20Assembly.md) - Mechanical and electrical assembly
+4. [🏗️ Lamp Setup](./docs/4.%20LeLamp%20Setup.md) - Runtime Setup
+5. [🎮 Lamp Control](./docs/5.%20LeLamp%20Control.md) - Controlling LeLamp
+6. [🔍 Common Issues](./docs/6.%20Common%20Issues.md) - Common issues and solutions
 
 ### Quick Reference
 
