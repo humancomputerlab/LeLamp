@@ -1,8 +1,8 @@
 {
 	"documentId": "16c9706360b5ad34f9c8db49",
-	"output_format": "mujoco",
+	"output_format": "urdf",
 	"assembly_name": "Robot",
-	"max_stl_size": 0.005,
+	"max_stl_size": 0.5,
 	"simplify_stls": true,
 	"joint_properties": {
 		"default": {
