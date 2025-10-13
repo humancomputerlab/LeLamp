@@ -61,6 +61,10 @@ We welcome contributions:
 
 Please check existing issues before creating new ones.
 
+Contributors:
+
+- [**@pham-tuan-binh**](https://github.com/pham-tuan-binh) (binhpham@binhph.am - prev HCL): Original mechanical design, electrical design and software runtime of LeLamp.
+
 ## Sponsor
 
 Biggest thanks to Jennie and Lily at Seeed Studio for sponsoring the SO-101 Arm Kit for early developments of LeLamp.
