@@ -34,7 +34,7 @@ LeLamp is an expressive robot lamp featuring:
 ### Quick Reference
 
 - **Bill of Materials**: [Complete component list with suppliers](./docs/0.%20Prerequisites.md#bill-of-materials)
-- **3D Print Files**: Available in `/3D/` directory ([OnShape CAD](https://cad.onshape.com/documents/16c9706360b5ad34f9c8db49/w/2edfa54c83253c120fbc9e58/e/a7196194821d9cfe2842a44a))
+- **3D Print Files**: Available in `/3D/` directory ([OnShape CAD](https://cad.onshape.com/documents/16c9706360b5ad34f9c8db49/w/2edfa54c83253c120fbc9e58/e/066b283a1dd44691595405f9?renderMode=0&uiState=68f843d69698883a5dd2dda4))
 - **Software Control**: [LeLamp Runtime Repository](https://github.com/humancomputerlab/lelamp_runtime)
 
 ## Project Status
