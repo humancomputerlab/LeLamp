@@ -8,7 +8,7 @@ An open source robot lamp based on [Apple's Elegnt](https://machinelearning.appl
 
 ![LeLamp in real life](./docs/assets/images/README/lelamp_irl.jpg)
 
-**Build specs:** ~$130 cost | 8-12 hours | Intermediate skill level
+**Build specs:** ~$260 cost | 8-12 hours | Intermediate skill level
 
 LeLamp is an expressive robot lamp featuring:
 
@@ -35,6 +35,7 @@ LeLamp is an expressive robot lamp featuring:
 
 - **Bill of Materials**: [Complete component list with suppliers](./docs/0.%20Prerequisites.md#bill-of-materials)
 - **3D Print Files**: Available in `/3D/` directory ([OnShape CAD](https://cad.onshape.com/documents/16c9706360b5ad34f9c8db49/w/2edfa54c83253c120fbc9e58/e/a7196194821d9cfe2842a44a))
+- **Order the Kit**: [Register interest here](https://docs.google.com/forms/d/e/1FAIpQLSfOXO2q_I2LKqYE0LoPN8VtrpKWrvJ1OkRAiS1iBFML1eqoGw/viewform?usp=sharing&ouid=105369619268976630712)
 - **Software Control**: [LeLamp Runtime Repository](https://github.com/humancomputerlab/lelamp_runtime)
 
 ## Project Status
