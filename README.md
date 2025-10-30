@@ -61,15 +61,12 @@ We welcome contributions:
 
 Please check existing issues before creating new ones.
 
-Contributors:
+## Maintainers
+Maintained by [Human Computer Lab](https://www.humancomputerlab.com).
 
-- [**@pham-tuan-binh**](https://github.com/pham-tuan-binh) (binhpham@binhph.am - prev HCL): Original mechanical design, electrical design and software runtime of LeLamp.
-
-## Sponsor
-
-Biggest thanks to Jennie and Lily at Seeed Studio for sponsoring the SO-101 Arm Kit for early developments of LeLamp.
-
-Buy an SO-101 Arm Kit today on [SeeedStudio](https://www.seeedstudio.com/SO-ARM101-Low-Cost-AI-Arm-Kit-p-6426.html).
+## Acknowledgments & Sponsors
+See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for contributors and their roles.  
+See [SPONSORS.md](./SPONSORS.md) for sponsor thanks and how to support the project.
 
 ## License
 
