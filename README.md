@@ -6,6 +6,8 @@ An open source robot lamp based on [Apple's Elegnt](https://machinelearning.appl
 
 ## Overview
 
+**NOTE: IF YOU'RE HERE FOR THE BOXBOTS HACKATHON, THIS IS THE OLD REPO. Go back to https://github.com/humancomputerlab/boxbots-lelamp**__
+
 ![LeLamp in real life](./docs/assets/images/README/lelamp_irl.jpg)
 
 **Build specs:** ~$260 cost | 8-12 hours | Intermediate skill level
