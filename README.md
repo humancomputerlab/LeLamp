@@ -4,6 +4,10 @@
 
 An open source robot lamp based on [Apple's Elegnt](https://machinelearning.apple.com/research/elegnt-expressive-functional-movement), made by [Human Computer Lab](https://www.humancomputerlab.com/)
 
+UPDATE: We are working on a closed-source version that will release end of 2027. You can also follow along on [TikTok](https://www.tiktok.com/@itslelamp?lang=en), [Instagram] (https://www.instagram.com/itslelamp/), [YouTube](https://www.youtube.com/@itslelamp), [LinkedIn](https://www.linkedin.com/company/humancomputerlab/?viewAsMember=true) and [X](https://x.com/humancomplab) for behind-the-scenes + updates.
+
+[LeLamp Website](https://www.lelamp.com/)
+
 ## Overview
 
 ![LeLamp in real life](./docs/assets/images/README/lelamp_irl.jpg)
@@ -40,7 +44,7 @@ LeLamp is an expressive robot lamp featuring:
 
 ## Project Status
 
-⚠️ **Early Development** - This project is actively being developed. We published our progress early to encourage community feedback and iteration.
+⚠️ **Early Development** - This project is actively being developed. We published our progress early to encourage community feedback and iteration. We are working on a closed-source version that will release in 2026. You can also follow along on TikTok, Instagram, YouTube, LinkedIn and X for behind-the-scenes + updates.
 
 ## Community & Support
 
