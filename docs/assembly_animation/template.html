@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeLamp Assembly Animation</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: -apple-system, "Segoe UI", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; background: #eef1f5; color: #1d2430; overflow: hidden; }
+  #app { display: grid; grid-template-columns: 280px minmax(0, 1fr); height: 100%; }
+  #side { background: #fff; border-right: 1px solid #dde3ea; overflow-y: auto; padding: 14px 10px; }
+  #head { display: flex; align-items: center; gap: 8px; margin: 2px 6px 4px; }
+  #side h1 { font-size: 17px; margin: 0; flex: 1; }
+  #lang { font-size: 12.5px; padding: 4px 9px; border-radius: 999px; }
+  #side .sub { font-size: 12px; color: #6b7685; margin: 0 6px 12px; line-height: 1.5; }
+  #side .sub a { color: #d9692a; }
+  .step { padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 13.5px; line-height: 1.35; margin-bottom: 3px; color: #3a4554; }
+  .step:hover { background: #f1f4f8; }
+  .step.done { color: #8a95a3; }
+  .step.active { background: #ff8a3d; color: #fff; font-weight: 600; }
+  #main { position: relative; min-height: 0; overflow: hidden; }
+  canvas { display: block; touch-action: none; }
+  #caption { position: absolute; left: 18px; right: 18px; bottom: 18px; background: rgba(255,255,255,.96); border-radius: 12px; padding: 14px 18px; box-shadow: 0 6px 24px rgba(20,30,50,.12); }
+  #caption h2 { margin: 0 0 6px; font-size: 19px; }
+  #caption p { margin: 0 0 6px; font-size: 15px; line-height: 1.6; }
+  #caption .warn { color: #c0392b; font-weight: 600; }
+  #controls { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+  button { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 8px; border: 1px solid #c9d1db; background: #fff; color: inherit; cursor: pointer; }
+  button.primary { background: #ff8a3d; border-color: #ff8a3d; color: #fff; font-weight: 600; }
+  button:hover { filter: brightness(.96); }
+  #speed { margin-left: auto; font-size: 13px; color: #6b7685; }
+  #legend { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,.94); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; line-height: 1.9; box-shadow: 0 3px 12px rgba(20,30,50,.08); }
+  #legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  #hint { position: absolute; top: 14px; left: 14px; font-size: 12.5px; color: #6b7685; background: rgba(255,255,255,.85); padding: 6px 10px; border-radius: 8px; }
+  #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #6b7685; }
+  @media (max-width: 760px) {
+    #app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    #side { border-right: 0; border-bottom: 1px solid #dde3ea; padding: 8px 8px 4px; overflow: hidden; }
+    #side .sub { display: none; }
+    #steps { display: flex; gap: 4px; overflow-x: auto; padding: 6px 0 4px; }
+    .step { white-space: nowrap; margin: 0; font-size: 12.5px; padding: 6px 9px; }
+    #legend, #hint { display: none; }
+    #caption { left: 8px; right: 8px; bottom: 8px; padding: 10px 12px; max-height: 55%; overflow-y: auto; }
+    #caption h2 { font-size: 16px; }
+    #caption p { font-size: 13.5px; line-height: 1.5; }
+    button { padding: 6px 10px; font-size: 13px; }
+    #speed { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <div id="head"><h1 data-i18n="title"></h1><button id="lang" title="中文 / English"></button></div>
+    <div class="sub" data-i18n-html="sub"></div>
+    <div id="steps"></div>
+  </div>
+  <div id="main">
+    <div id="loading" data-i18n="loading"></div>
+    <div id="hint" data-i18n="hint"></div>
+    <div id="legend">
+      <div><i style="background:#ff8a3d"></i><span data-i18n="lgPrint"></span></div>
+      <div><i style="background:#2b3442"></i><span data-i18n="lgServo"></span></div>
+      <div><i style="background:#e0a53a"></i><span data-i18n="lgDrive"></span></div>
+      <div><i style="background:#c9d3de;border:1px solid #9aa6b4"></i><span data-i18n="lgIdle"></span></div>
+      <div><i style="background:#8f99a6"></i><span data-i18n="lgDone"></span></div>
+    </div>
+    <div id="caption">
+      <h2 id="title"></h2>
+      <p id="text"></p>
+      <p class="warn" id="warn"></p>
+      <div id="controls">
+        <button id="prev" data-i18n="prev"></button>
+        <button id="replay" data-i18n="replay"></button>
+        <button id="next" class="primary" data-i18n="next"></button>
+        <button id="play"></button>
+        <span id="speed"><span data-i18n="speed"></span> <select id="speedSel"><option value="0.6" data-i18n="slow"></option><option value="1" selected data-i18n="normal"></option><option value="1.6" data-i18n="fast"></option></select></span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>/*__THREE__*/</script>
+<script>
+const META = __META__;
+const DATA_B64 = "__DATA__";
+
+const I18N = {
+  zh: {
+    title: 'LeLamp 装配动画', langBtn: 'English',
+    sub: '由官方 Onshape 装配模型（<code>simulation/robot.urdf</code>）生成，配合 <a href="https://github.com/humancomputerlab/LeLamp/blob/master/docs/3.%20LeLamp%20Assembly.md">官方装配文档</a> 使用。点击步骤可跳转；键盘 ← → 切换，空格自动播放。',
+    loading: '正在加载模型…', hint: '拖动旋转 · 滚轮/双指缩放 · 右键或 Shift+拖动平移',
+    lgPrint: '这一步要装的打印件', lgServo: '舵机', lgDrive: '带齿舵盘（铜齿面，拧螺丝）', lgIdle: '无齿舵盘（背面，只套上）', lgDone: '已经装好的零件',
+    prev: '← 上一步', replay: '↻ 重播', next: '下一步 →', play: '▶ 自动播放', pause: '⏸ 暂停',
+    speed: '动画速度', slow: '慢', normal: '正常', fast: '快',
+    driver: '驱动板（底座内）', loadFail: '加载失败：{err}（请用新版 Chrome / Edge / Safari / Firefox 打开）',
+  },
+  en: {
+    title: 'LeLamp Assembly Animation', langBtn: '中文',
+    sub: 'Generated from the official Onshape assembly (<code>simulation/robot.urdf</code>). Use it alongside the <a href="https://github.com/humancomputerlab/LeLamp/blob/master/docs/3.%20LeLamp%20Assembly.md">official assembly guide</a>. Click a step to jump; ← → to switch, Space to auto-play.',
+    loading: 'Loading model…', hint: 'Drag to rotate · wheel / pinch to zoom · right-drag or Shift+drag to pan',
+    lgPrint: 'Printed part for this step', lgServo: 'Servo', lgDrive: 'Geared horn (copper-gear side, screwed)', lgIdle: 'Plain horn (back side, not screwed)', lgDone: 'Already installed',
+    prev: '← Back', replay: '↻ Replay', next: 'Next →', play: '▶ Auto-play', pause: '⏸ Pause',
+    speed: 'Speed', slow: 'Slow', normal: 'Normal', fast: 'Fast',
+    driver: 'Servo driver (inside base)', loadFail: 'Failed to load: {err} (please use a recent Chrome / Edge / Safari / Firefox)',
+  },
+};
+function pickLang() {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q in I18N) return q;
+  try { const s = localStorage.getItem('lelamp-assembly-lang'); if (s in I18N) return s; } catch (e) {}
+  return (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+let lang = pickLang();
+const tr = v => (v && typeof v === 'object') ? v[lang] : (v || '');
+const ui = k => I18N[lang][k];
+
+const COLORS = { print: 0xff8a3d, servo: 0x2b3442, horn_drive: 0xe0a53a, horn_idle: 0xc9d3de, cover: 0x3b61b4, diffuser: 0xf3f0e6 };
+const DONE_COLOR = 0x8f99a6;
+
+const main = document.getElementById('main');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+main.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xeef1f5);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.up.set(0, 0, 1);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6d7480, 0.45));
+const sun = new THREE.DirectionalLight(0xffffff, 0.6); sun.position.set(-300, -500, 800); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.22); fill.position.set(400, 300, 200); scene.add(fill);
+const grid = new THREE.GridHelper(800, 40, 0xc5ccd6, 0xdde2e8); grid.rotation.x = Math.PI / 2; scene.add(grid);
+
+function resize() {
+  const w = main.clientWidth, h = main.clientHeight;
+  renderer.setSize(w, h); camera.aspect = w / h;
+  const cap = document.getElementById('caption');
+  camera.setViewOffset(w, h, 0, (cap ? cap.offsetHeight : 0) * 0.5, w, h);
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+
+// ---- simple orbit camera (mouse + touch) ----
+const view = { target: new THREE.Vector3(0, 0, 150), az: 0.55, el: 0.38, dist: 600 };
+const goal = { target: view.target.clone(), az: view.az, el: view.el, dist: view.dist };
+let userMoved = false;
+function applyCamera() {
+  const ce = Math.cos(view.el);
+  camera.position.set(
+    view.target.x + view.dist * ce * Math.sin(view.az),
+    view.target.y - view.dist * ce * Math.cos(view.az),
+    view.target.z + view.dist * Math.sin(view.el));
+  camera.lookAt(view.target);
+}
+const zoom = f => { goal.dist = Math.max(80, Math.min(2000, goal.dist * f)); userMoved = true; };
+const pointers = new Map();
+let drag = null, pinch = 0;
+const el = renderer.domElement;
+el.addEventListener('contextmenu', e => e.preventDefault());
+el.addEventListener('pointerdown', e => {
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  el.setPointerCapture(e.pointerId);
+  drag = pointers.size === 1 ? { x: e.clientX, y: e.clientY, pan: e.button === 2 || e.shiftKey } : null;
+  pinch = 0;
+});
+const release = e => { pointers.delete(e.pointerId); drag = null; pinch = 0; };
+el.addEventListener('pointerup', release);
+el.addEventListener('pointercancel', release);
+el.addEventListener('pointermove', e => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pinch) zoom(pinch / d);
+    pinch = d;
+    return;
+  }
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.pan) {
+    const s = view.dist / main.clientHeight;
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+    goal.target.addScaledVector(right, -dx * s).addScaledVector(up, dy * s);
+  } else {
+    goal.az -= dx * 0.008; goal.el = Math.max(-0.2, Math.min(1.45, goal.el + dy * 0.008));
+  }
+  userMoved = true;
+});
+el.addEventListener('wheel', e => { e.preventDefault(); zoom(Math.exp(e.deltaY * 0.001)); }, { passive: false });
+
+// ---- text sprites ----
+const LABEL_FONT = '-apple-system, "Segoe UI", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif';
+function makeLabel(text, big) {
+  const fs = big ? 44 : 34, pad = 18;
+  const c = document.createElement('canvas'), g = c.getContext('2d');
+  g.font = `600 ${fs}px ${LABEL_FONT}`;
+  const w = Math.ceil(g.measureText(text).width) + pad * 2, h = fs + pad * 1.4;
+  c.width = w; c.height = h;
+  g.font = `600 ${fs}px ${LABEL_FONT}`;
+  g.fillStyle = big ? 'rgba(29,36,48,.9)' : 'rgba(224,165,58,.95)';
+  const r = 14; g.beginPath(); g.roundRect ? g.roundRect(0, 0, w, h, r) : g.rect(0, 0, w, h); g.fill();
+  g.fillStyle = '#fff'; g.textBaseline = 'middle'; g.fillText(text, pad, h / 2 + 2);
+  const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+  sp.userData.aspect = w / h; sp.userData.px = h; sp.renderOrder = 10;
+  return sp;
+}
+const overlay = new THREE.Group(); scene.add(overlay);
+function clearOverlay() { while (overlay.children.length) { const o = overlay.children.pop(); o.traverse(x => { if (x.material) { x.material.map && x.material.map.dispose(); x.material.dispose(); } if (x.geometry) x.geometry.dispose(); }); } }
+function holder(follow) {
+  const g = new THREE.Group(); g.userData.follow = follow; overlay.add(g); return g;
+}
+function placeLabel(sp, at, lift, follow) { sp.position.set(at[0], at[1], at[2] + (lift || 0)); holder(follow).add(sp); }
+function scaleSprites() {
+  overlay.traverse(o => {
+    if (!o.isSprite) return;
+    const d = camera.position.distanceTo(o.getWorldPosition(new THREE.Vector3()));
+    const worldPerPx = 2 * d * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / main.clientHeight;
+    const hpx = o.userData.px * (main.clientWidth < 760 ? 0.42 : 0.55);
+    o.scale.set(hpx * o.userData.aspect * worldPerPx, hpx * worldPerPx, 1);
+  });
+}
+
+// ---- meshes ----
+const meshes = {};
+async function loadModels() {
+  const bin = Uint8Array.from(atob(DATA_B64), ch => ch.charCodeAt(0));
+  const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const buf = await new Response(stream).arrayBuffer();
+  const lo = META.lo, hi = META.hi;
+  for (const it of META.items) {
+    const q = new Uint16Array(buf, it.pos[0], it.pos[1] * 3);
+    const pos = new Float32Array(q.length);
+    for (let i = 0; i < q.length; i++) { const a = i % 3; pos[i] = lo[a] + q[i] / 65535 * (hi[a] - lo[a]); }
+    let geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setIndex(new THREE.BufferAttribute(new Uint32Array(buf, it.idx[0], it.idx[1]), 1));
+    geo = geo.toNonIndexed(); geo.computeVertexNormals();
+    const kind = it.kind;
+    const mat = new THREE.MeshStandardMaterial({
+      color: COLORS[kind], roughness: kind.startsWith('horn') ? 0.35 : 0.7, metalness: kind.startsWith('horn') ? 0.55 : 0.05,
+      side: THREE.DoubleSide, transparent: kind === 'diffuser', opacity: kind === 'diffuser' ? 0.8 : 1 });
+    const m = new THREE.Mesh(geo, mat);
+    m.userData = { kind, id: it.id };
+    m.visible = false;
+    scene.add(m); meshes[it.id] = m;
+  }
+}
+
+// ---- steps ----
+const steps = META.steps;
+const installedBy = {};  // item id -> step index that installs it
+steps.forEach((s, i) => s.anim.forEach(a => installedBy[a.id] = i));
+let cur = 0, t = 0, playing = false, holdTimer = 0;
+const DURATION = 3.6;
+
+const stepList = document.getElementById('steps');
+steps.forEach((s, i) => {
+  const d = document.createElement('div'); d.className = 'step';
+  d.onclick = () => { setPlaying(false); go(i); }; stepList.appendChild(d);
+});
+
+function interp(keys, u) {
+  if (u <= keys[0][0]) return keys[0][1];
+  for (let k = 1; k < keys.length; k++) {
+    if (u <= keys[k][0]) {
+      const [t0, a] = keys[k - 1], [t1, b] = keys[k];
+      let s = (u - t0) / (t1 - t0); s = s * s * (3 - 2 * s);
+      return [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
+    }
+  }
+  return keys[keys.length - 1][1];
+}
+
+function stepFocus(s) {
+  const ids = s.anim.map(a => a.id);
+  if (!ids.length || s.wiring) return [0, 0, 170];
+  const c = [0, 0, 0]; ids.forEach(id => { const p = META.centroids[id]; c[0] += p[0]; c[1] += p[1]; c[2] += p[2]; });
+  return c.map(v => v / ids.length);
+}
+
+function applyLanguage() {
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.title = ui('title');
+  document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = ui(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(e => e.innerHTML = ui(e.dataset.i18nHtml));
+  document.getElementById('lang').textContent = ui('langBtn');
+  document.getElementById('play').textContent = ui(playing ? 'pause' : 'play');
+  [...stepList.children].forEach((d, i) => d.textContent = tr(steps[i].title));
+}
+
+function showStepText() {
+  const s = steps[cur];
+  document.getElementById('title').textContent = tr(s.title);
+  document.getElementById('text').textContent = tr(s.text);
+  document.getElementById('warn').textContent = s.warn ? '⚠ ' + tr(s.warn) : '';
+  resize();
+  clearOverlay();
+  (s.labels || []).forEach(l => placeLabel(makeLabel(tr(l.text), l.big), l.at, l.lift ?? (l.big ? 42 : 18), l.follow));
+  (s.arrows || []).forEach(a => {
+    const dir = new THREE.Vector3(...a.dir).normalize();
+    const arrow = new THREE.ArrowHelper(dir, new THREE.Vector3(...a.from), a.len, 0xe0a53a, 14, 9);
+    arrow.traverse(o => { if (o.material) o.material.depthTest = false; o.renderOrder = 9; });
+    const g = holder(a.follow); g.add(arrow);
+    const tip = new THREE.Vector3(...a.from).addScaledVector(dir, a.len + 12);
+    const sp = makeLabel(tr(a.text), false); sp.position.copy(tip); g.add(sp);
+  });
+  if (s.wiring) drawWiring();
+}
+
+function go(i) {
+  cur = Math.max(0, Math.min(steps.length - 1, i)); t = 0; holdTimer = 0;
+  const s = steps[cur];
+  [...stepList.children].forEach((d, k) => d.className = 'step' + (k === cur ? ' active' : k < cur ? ' done' : ''));
+  stepList.children[cur].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  for (const [id, m] of Object.entries(meshes)) {
+    const at = installedBy[id];
+    m.visible = s.preview || (at !== undefined && at <= cur);
+    m.position.set(0, 0, 0);
+    const kind = m.userData.kind;
+    const active = at === cur;
+    m.material.color.setHex(active || s.preview || kind !== 'print' ? COLORS[kind] : DONE_COLOR);
+    m.material.emissive.setHex(active && kind === 'print' ? 0x5a2200 : 0x000000);
+  }
+  showStepText();
+  const narrow = main.clientWidth < 760;
+  const f = new THREE.Vector3(...(s.focus || stepFocus(s)));
+  if (narrow && s.focus) f.lerp(new THREE.Vector3(...stepFocus(s)), 0.7);
+  goal.target.copy(f); goal.dist = s.dist * (narrow ? 1.35 : 1);
+  const turnTo = (az, el) => { goal.az = az + 2 * Math.PI * Math.round((view.az - az) / (2 * Math.PI)); goal.el = el; };
+  if (s.view) turnTo(...s.view);
+  else if (!userMoved || s.spin || steps[cur - 1]?.view) turnTo(0.55, 0.38);
+  userMoved = false;
+}
+
+function drawWiring() {
+  const pts = [META.driver, ...META.servos.map(s => s.at)].map(p => new THREE.Vector3(...p));
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 240, 2.6, 8),
+    new THREE.MeshBasicMaterial({ color: 0xf2b400, depthTest: false, transparent: true, opacity: 0.95 }));
+  tube.renderOrder = 8;
+  overlay.add(tube);
+  placeLabel(makeLabel(ui('driver'), true), META.driver, -10);
+}
+
+function setPlaying(p) { playing = p; document.getElementById('play').textContent = ui(p ? 'pause' : 'play'); }
+document.getElementById('prev').onclick = () => { setPlaying(false); go(cur - 1); };
+document.getElementById('next').onclick = () => { setPlaying(false); go(cur + 1); };
+document.getElementById('replay').onclick = () => go(cur);
+document.getElementById('play').onclick = () => { if (!playing && cur === steps.length - 1) go(0); setPlaying(!playing); };
+document.getElementById('lang').onclick = () => {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  try { localStorage.setItem('lelamp-assembly-lang', lang); } catch (e) {}
+  applyLanguage(); showStepText();
+};
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowRight') { setPlaying(false); go(cur + 1); }
+  else if (e.key === 'ArrowLeft') { setPlaying(false); go(cur - 1); }
+  else if (e.key === ' ') { e.preventDefault(); document.getElementById('play').click(); }
+});
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const speed = parseFloat(document.getElementById('speedSel').value);
+  const s = steps[cur];
+  if (t < 1) t = Math.min(1, t + dt * speed / DURATION);
+  for (const a of s.anim) {
+    const m = meshes[a.id]; if (!m) continue;
+    const p = interp(a.keys, t); m.position.set(p[0], p[1], p[2]);
+  }
+  overlay.children.forEach(g => { const m = g.userData.follow && meshes[g.userData.follow]; if (m) g.position.copy(m.position); });
+  const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+  for (const a of s.anim) { const m = meshes[a.id]; if (m && m.userData.kind === 'print') m.material.emissive.setRGB(0.35 * pulse * (t < 1 ? 1 : 0.5), 0.13 * pulse * (t < 1 ? 1 : 0.5), 0); }
+  if (s.spin) goal.az += dt * 0.35;
+  if (playing && t >= 1) { holdTimer += dt * speed; if (holdTimer > 2.2 && cur < steps.length - 1) go(cur + 1); else if (cur === steps.length - 1) setPlaying(false); }
+  const k = 1 - Math.pow(0.002, dt);
+  view.target.lerp(goal.target, k); view.az += (goal.az - view.az) * k; view.el += (goal.el - view.el) * k; view.dist += (goal.dist - view.dist) * k;
+  applyCamera(); scaleSprites();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+applyLanguage();
+loadModels().then(() => {
+  document.getElementById('loading').remove();
+  go(0); requestAnimationFrame(frame);
+}).catch(err => { document.getElementById('loading').textContent = ui('loadFail').replace('{err}', err); });
+</script>
+</body>
+</html>
